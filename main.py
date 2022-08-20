@@ -36,10 +36,12 @@ def get_items(id: int):
 
 
 @app.post("/")
-def add_items(item: schemas.Item):
-    new_id = len(fake_database.keys()) + 1
-    fake_database[new_id] = {"task": item.task}
-    return fake_database
+def add_items(item: schemas.Item, session: Session = Depends(get_session)):
+    item = models.Item(task=item.task)
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item
 
 
 @app.put("/{id}")
