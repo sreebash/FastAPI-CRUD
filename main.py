@@ -1,8 +1,20 @@
-from fastapi import FastAPI
-
+from fastapi import FastAPI, Depends
+import models
+from database import Base, engine, SessionLocal
+from sqlalchemy.orm import Session
 import schemas
 
 app = FastAPI()
+Base.metadata.create_all(engine)
+
+
+def get_session():
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+
 
 fake_database = {
     1: {'task': 'Clean car'},
@@ -13,8 +25,9 @@ fake_database = {
 
 
 @app.get("/")
-def get_items():
-    return fake_database
+def get_items(session: Session = Depends(get_session)):
+    items = session.query(models.Item).all()
+    return items
 
 
 @app.get('/{id}')
