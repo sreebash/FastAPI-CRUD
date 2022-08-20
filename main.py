@@ -31,8 +31,9 @@ def get_items(session: Session = Depends(get_session)):
 
 
 @app.get('/{id}')
-def get_items(id: int):
-    return fake_database[id]
+def get_items(id: int, session: Session = Depends(get_session)):
+    item = session.query(models.Item).get(id)
+    return item
 
 
 @app.post("/")
@@ -45,12 +46,14 @@ def add_items(item: schemas.Item, session: Session = Depends(get_session)):
 
 
 @app.put("/{id}")
-def update_item(id: int, item: schemas.Item):
-    fake_database[id]['task'] = item.task
-    return fake_database
+def update_item(id: int, item: schemas.Item, session: Session = Depends(get_session)):
+    item_obj = session.query(models.Item).get(id)
+    item_obj.task = item.task
+    session.commit()
+    return item_obj
 
 
 @app.delete("/{id}")
-def delete_item(id: int):
+def delete_item(id: int, session: Session = Depends(get_session)):
     del fake_database[id]
     return fake_database
