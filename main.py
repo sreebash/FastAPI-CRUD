@@ -55,5 +55,7 @@ def update_item(id: int, item: schemas.Item, session: Session = Depends(get_sess
 
 @app.delete("/{id}")
 def delete_item(id: int, session: Session = Depends(get_session)):
-    del fake_database[id]
-    return fake_database
+    item = session.query(models.Item).get(id)
+    session.delete(item)
+    session.commit()
+    return item
